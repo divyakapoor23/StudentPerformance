@@ -1,0 +1,54 @@
+# ── CORE DATA HANDLING (all phases) ─────────────────────────
+pandas==2.2.3
+numpy==2.3.4
+scipy==1.18.0
+joblib==1.5.3
+
+# ── EDA AND VISUALISATION (weeks 1–2) ───────────────────────
+matplotlib==3.11.0
+seaborn==0.13.2
+plotly==6.8.0
+missingno==0.5.2
+
+# ── FEATURE ENGINEERING (weeks 3–5) ─────────────────────────
+scikit-learn==1.8.0
+imbalanced-learn==0.14.2
+category-encoders==2.9.0
+
+# ── BASELINE MODELLING (weeks 6–8) ──────────────────────────
+xgboost==3.3.0
+lightgbm==4.6.0
+shap==0.52.0
+numba==0.62.1
+optuna==4.9.0
+mlflow==3.14.0
+
+# ── DEEP LEARNING — TensorFlow/Keras (weeks 12–13) ──────────
+# NOTE: For GPU support install: pip install tensorflow[and-cuda]
+tensorflow==2.21.0
+tensorboard==2.21.0
+
+# ── ADVANCED EXTENSIONS ─────────────────────────────────────
+
+# Fairness and bias audit (week 14)
+fairlearn==0.14.0
+
+# Graph-based learning (week 15)
+# NOTE: torch and torch-geometric must be installed separately.
+# Visit https://pytorch.org/get-started/locally for your platform:
+#   pip install torch
+#   pip install torch-geometric
+networkx==3.6.1
+
+# Survival and causal analysis (week 16)
+lifelines==0.30.3
+scikit-survival==0.27.0
+# NOTE: dowhy has heavy dependencies — install separately if needed:
+#   pip install dowhy
+
+# ── DASHBOARD AND DEPLOYMENT (week 17) ──────────────────────
+streamlit==1.58.0
+
+# ── DEVELOPMENT UTILITIES ────────────────────────────────────
+jupyterlab
+ipykernel
