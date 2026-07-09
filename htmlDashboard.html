@@ -1,0 +1,360 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+<style>
+  :root{
+    --paper:#EEF0EA;
+    --paper-raised:#F7F8F4;
+    --ink:#1B2420;
+    --ink-soft:#5C6660;
+    --rule:#C7CBBF;
+    --distinction:#1B7A6B;
+    --pass:#2A5C8A;
+    --fail:#C0791E;
+    --withdrawn:#A5372E;
+    --mono:'IBM Plex Mono', monospace;
+    --serif:'Fraunces', serif;
+    --sans:'Inter', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  .oulad-dash{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.5;
+    padding:0;
+    margin:0;
+    overflow-x:hidden;
+  }
+  .oulad-dash h1,.oulad-dash h2,.oulad-dash h3{font-family:var(--serif); margin:0; font-weight:600;}
+  .oulad-dash .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--ink-soft); display:flex; align-items:center; gap:8px; margin-bottom:10px;
+  }
+  .oulad-dash .eyebrow::before{content:''; width:16px; height:1px; background:var(--ink-soft); display:inline-block;}
+  .oulad-section{padding:64px 8vw; max-width:1180px; margin:0 auto;}
+  .oulad-rule{border:none; border-top:1px solid var(--rule); margin:0;}
+
+  /* ---- Ticker signature: attendance / roll-call timeline ---- */
+  .ticker{
+    display:flex; align-items:flex-end; height:34px; width:100%; overflow:hidden;
+    gap:2px; opacity:0.85;
+  }
+  .ticker span{flex:1; background:var(--rule); height:8px; min-width:1px;}
+  .ticker span.tick-major{background:var(--ink-soft); height:18px;}
+  .ticker span.tick-zero{background:var(--withdrawn); height:34px; width:2px; flex:0 0 2px;}
+
+  /* ---- Hero ---- */
+  .hero{padding:72px 8vw 40px; max-width:1180px; margin:0 auto;}
+  .hero h1{font-size:clamp(34px,5vw,58px); line-height:1.05; max-width:14ch; letter-spacing:-0.01em;}
+  .hero .sub{font-size:17px; color:var(--ink-soft); max-width:56ch; margin-top:18px;}
+  .hero-stat-row{display:flex; gap:48px; margin-top:44px; flex-wrap:wrap;}
+  .hero-stat .num{font-family:var(--mono); font-size:40px; font-weight:600; letter-spacing:-0.02em;}
+  .hero-stat .lbl{font-size:13px; color:var(--ink-soft); max-width:22ch; margin-top:4px;}
+  .hero-stat.hl .num{color:var(--distinction);}
+
+  /* ---- Metric cards ---- */
+  .metric-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--rule); border:1px solid var(--rule); margin-top:28px;}
+  .metric-card{background:var(--paper-raised); padding:22px 20px;}
+  .metric-card .num{font-family:var(--mono); font-size:26px; font-weight:600;}
+  .metric-card .lbl{font-size:12.5px; color:var(--ink-soft); margin-top:4px;}
+
+  /* ---- Outcome bars (defined by real data, not decoration) ---- */
+  .outcome-bar{display:flex; height:40px; width:100%; border-radius:2px; overflow:hidden; margin-top:18px;}
+  .outcome-bar div{display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:12px; color:#fff;}
+  .outcome-legend{display:flex; gap:22px; margin-top:14px; flex-wrap:wrap;}
+  .outcome-legend .item{display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-soft);}
+  .outcome-legend .dot{width:10px; height:10px; border-radius:2px;}
+
+  /* ---- Findings ---- */
+  .finding{display:grid; grid-template-columns:1fr 1.1fr; gap:44px; padding:44px 0; border-top:1px solid var(--rule); align-items:center;}
+  .finding:last-child{border-bottom:1px solid var(--rule);}
+  .finding .tag{font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:3px 8px; border:1px solid var(--rule); display:inline-block; color:var(--ink-soft);}
+  .finding h3{font-size:23px; margin-top:14px; max-width:20ch;}
+  .finding p{color:var(--ink-soft); font-size:15px; margin-top:12px; max-width:48ch;}
+  .finding .chart-box{background:var(--paper-raised); border:1px solid var(--rule); padding:20px; height:260px;}
+  .stat-inline{font-family:var(--mono); color:var(--ink); font-weight:600;}
+
+  /* ---- Methodology steps (real sequence -> numbering justified) ---- */
+  .steps{display:grid; grid-template-columns:repeat(5,1fr); gap:0; margin-top:28px; border:1px solid var(--rule);}
+  .step{padding:18px 16px; border-right:1px solid var(--rule); border-bottom:1px solid var(--rule);}
+  .step:nth-child(5n){border-right:none;}
+  .step .n{font-family:var(--mono); font-size:11px; color:var(--ink-soft);}
+  .step .t{font-size:13px; margin-top:6px; font-weight:500;}
+
+  /* ---- Model comparison ---- */
+  .model-compare{display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px;}
+  .model-card{background:var(--paper-raised); border:1px solid var(--rule); padding:24px;}
+  .model-card .acc{font-family:var(--mono); font-size:38px; font-weight:600;}
+  .model-card.leaky .acc{color:var(--fail);}
+  .model-card.honest .acc{color:var(--distinction);}
+  .model-card .name{font-size:13px; color:var(--ink-soft); margin-top:4px;}
+  .model-card ul{margin:14px 0 0; padding-left:18px; font-size:13px; color:var(--ink-soft);}
+
+  /* ---- Caveats ---- */
+  .caveat-list{margin-top:20px; display:flex; flex-direction:column; gap:14px;}
+  .caveat-list li{list-style:none; padding-left:22px; position:relative; font-size:14.5px; color:var(--ink-soft); max-width:70ch;}
+  .caveat-list li::before{content:'—'; position:absolute; left:0; color:var(--withdrawn);}
+
+  /* ---- Footer ---- */
+  .oulad-footer{padding:44px 8vw 64px; max-width:1180px; margin:0 auto; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px;}
+  .tech-tags{display:flex; gap:8px; flex-wrap:wrap;}
+  .tech-tags span{font-family:var(--mono); font-size:11px; border:1px solid var(--rule); padding:4px 9px; color:var(--ink-soft);}
+  .cta{font-family:var(--mono); font-size:13px; color:var(--ink); border:1px solid var(--ink); padding:10px 18px; text-decoration:none; display:inline-block; transition:background .15s, color .15s;}
+  .cta:hover{background:var(--ink); color:var(--paper);}
+  .cta:focus-visible, a:focus-visible, button:focus-visible{outline:2px solid var(--pass); outline-offset:2px;}
+
+  @media (max-width:820px){
+    .finding{grid-template-columns:1fr;}
+    .metric-grid{grid-template-columns:repeat(2,1fr);}
+    .steps{grid-template-columns:repeat(2,1fr);}
+    .step:nth-child(5n){border-right:1px solid var(--rule);}
+    .step:nth-child(2n){border-right:none;}
+    .model-compare{grid-template-columns:1fr;}
+    .hero-stat-row{gap:32px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .oulad-dash *{animation:none !important; transition:none !important;}
+  }
+</style>
+
+<div class="oulad-dash">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="eyebrow">OULAD · Learning Analytics · Portfolio Case Study</div>
+    <h1>Do the first clicks predict the final grade?</h1>
+    <p class="sub">An exploratory analysis of 32,593 Open University enrollments — cleaning messy placeholder values, engineering engagement features from 10.6M clickstream records, and testing whether early behavior can honestly predict who passes.</p>
+
+    <div class="hero-stat-row">
+      <div class="hero-stat hl">
+        <div class="num">6×</div>
+        <div class="lbl">more VLE clicks among students who passed vs. withdrew</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">65%</div>
+        <div class="lbl">leakage-free model accuracy predicting pass / not-pass</div>
+      </div>
+      <div class="hero-stat">
+        <div class="num">p ≈ 0</div>
+        <div class="lbl">for both the chi-square and t-test on engagement effects</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticker" id="ticker" aria-hidden="true"></div>
+
+  <!-- OVERVIEW -->
+  <div class="oulad-section">
+    <div class="eyebrow">Dataset</div>
+    <h2 style="font-size:26px;">32,593 student-course enrollments, four outcomes</h2>
+
+    <div class="outcome-bar" id="outcomeBar"></div>
+    <div class="outcome-legend" id="outcomeLegend"></div>
+
+    <div class="metric-grid">
+      <div class="metric-card"><div class="num">7</div><div class="lbl">linked source tables merged</div></div>
+      <div class="metric-card"><div class="num">10.6M</div><div class="lbl">raw VLE click records aggregated</div></div>
+      <div class="metric-card"><div class="num">3</div><div class="lbl">columns hiding "?" as missing data</div></div>
+      <div class="metric-card"><div class="num">19</div><div class="lbl">engineered features in the final table</div></div>
+    </div>
+  </div>
+
+  <hr class="oulad-rule">
+
+  <!-- FINDINGS -->
+  <div class="oulad-section">
+    <div class="eyebrow">Key Findings</div>
+    <h2 style="font-size:26px; max-width:22ch;">Engagement is the strongest signal — but it isn't clean</h2>
+
+    <div class="finding">
+      <div>
+        <span class="tag">Engagement</span>
+        <h3>Clicks track outcome almost like a staircase</h3>
+        <p>Average total clicks rise from <span class="stat-inline">314</span> (Withdrawn) to <span class="stat-inline">652</span> (Fail), <span class="stat-inline">1,922</span> (Pass), and <span class="stat-inline">2,667</span> (Distinction). Confirmed with Welch's t-test, not just raw averages (t ≈ 90.7, p ≈ 0).</p>
+      </div>
+      <div class="chart-box"><canvas id="chartClicks"></canvas></div>
+    </div>
+
+    <div class="finding">
+      <div>
+        <span class="tag">Timing</span>
+        <h3>Logging in before day one matters</h3>
+        <p>Students who clicked anything before the official start date passed at <span class="stat-inline">44.0%</span> vs. <span class="stat-inline">21.6%</span> for everyone else, and withdrew at half the rate. Real, but moderate (Cramér's V = 0.288) — likely reflects motivation rather than early-login itself causing success.</p>
+      </div>
+      <div class="chart-box"><canvas id="chartTiming"></canvas></div>
+    </div>
+
+    <div class="finding">
+      <div>
+        <span class="tag">Completion</span>
+        <h3>Completion rate is closer to a definition than a predictor</h3>
+        <p>Pass/Distinction students complete <span class="stat-inline">87-88%</span> of assessments; Withdrawn students complete only <span class="stat-inline">29%</span>. Consistent with withdrawal meaning "stopped partway through" — a caution explored further in the model comparison below.</p>
+      </div>
+      <div class="chart-box"><canvas id="chartCompletion"></canvas></div>
+    </div>
+
+    <div class="finding">
+      <div>
+        <span class="tag">Education</span>
+        <h3>Prior qualification shifts the odds, doesn't decide them</h3>
+        <p>Pass rate climbs from <span class="stat-inline">29.7%</span> (no formal quals) to <span class="stat-inline">65.5%</span> (postgraduate) — though the extreme groups are small (313-347 students) next to the 13-14k-strong middle categories.</p>
+      </div>
+      <div class="chart-box"><canvas id="chartEducation"></canvas></div>
+    </div>
+  </div>
+
+  <hr class="oulad-rule">
+
+  <!-- MODEL -->
+  <div class="oulad-section">
+    <div class="eyebrow">Predictive Modeling</div>
+    <h2 style="font-size:26px; max-width:26ch;">Two logistic regressions, one honest number</h2>
+    <p style="color:var(--ink-soft); max-width:64ch; margin-top:10px; font-size:15px;">The first model uses full in-course behavior and looks great. The second drops anything that could only be known because the course already happened. The gap between them is the finding.</p>
+
+    <div class="model-compare">
+      <div class="model-card leaky">
+        <div class="acc">91.3%</div>
+        <div class="name">Model 1 — includes completion_rate, total_clicks</div>
+        <ul>
+          <li>Dominated by one coefficient: completion_rate</li>
+          <li>Mostly detects students who already stopped participating</li>
+          <li>Not a fair test of early prediction</li>
+        </ul>
+      </div>
+      <div class="model-card honest">
+        <div class="acc">64.6%</div>
+        <div class="name">Model 2 — demographics + prior attempts + early engagement only</div>
+        <ul>
+          <li>Balanced precision/recall (0.62–0.67) across both classes</li>
+          <li>engaged_before_start re-emerges as the top predictor</li>
+          <li>The realistic ceiling on early prediction from this data</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="eyebrow" style="margin-top:44px;">Method</div>
+    <div class="steps">
+      <div class="step"><div class="n">01–02</div><div class="t">Load, peek, and resolve hidden "?" placeholders</div></div>
+      <div class="step"><div class="n">03–04</div><div class="t">Profile columns, merge 7 tables with row-count checks</div></div>
+      <div class="step"><div class="n">05–06</div><div class="t">Groupby demographics; aggregate 10.6M click rows</div></div>
+      <div class="step"><div class="n">07–08</div><div class="t">Visualize relationships; engineer timing &amp; completion features</div></div>
+      <div class="step"><div class="n">09–10</div><div class="t">Chi-square / t-test significance; leakage-aware modeling</div></div>
+    </div>
+  </div>
+
+  <hr class="oulad-rule">
+
+  <!-- CAVEATS -->
+  <div class="oulad-section">
+    <div class="eyebrow">Caveats</div>
+    <ul class="caveat-list">
+      <li>All relationships found are correlational — no causal claims can be made from this analysis alone.</li>
+      <li>Engagement metrics are themselves outcomes of student behavior, not independent causes — demonstrated directly by the 91% vs. 65% accuracy gap.</li>
+      <li>65% accuracy is a more honest ceiling, but still modest — most of the variance in outcome isn't explained by demographics and early engagement alone.</li>
+      <li>Sample sizes vary a lot across subgroups (education level, region) — group sizes were checked before trusting any percentage.</li>
+    </ul>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="oulad-footer">
+    <div>
+      <div class="eyebrow">Stack</div>
+      <div class="tech-tags">
+        <span>pandas</span><span>numpy</span><span>matplotlib</span><span>scipy</span><span>scikit-learn</span>
+      </div>
+    </div>
+    <a class="cta" href="#" onclick="return false;">View full notebook →</a>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const ink = '#1B2420', inkSoft='#5C6660', rule='#C7CBBF';
+  const distinction='#1B7A6B', pass='#2A5C8A', fail='#C0791E', withdrawn='#A5372E';
+
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.color = inkSoft;
+  Chart.defaults.font.size = 11;
+
+  // ---- Signature ticker: real day range from studentVle.csv (-25 to 269), zero = course start
+  const ticker = document.getElementById('ticker');
+  const start = -25, end = 269;
+  const total = end - start;
+  for(let d=start; d<=end; d+=3){
+    const s = document.createElement('span');
+    if(d===0){ s.className='tick-zero'; }
+    else if(d % 30 === 0){ s.className='tick-major'; }
+    ticker.appendChild(s);
+  }
+
+  // ---- Outcome bar (real distribution) ----
+  const outcomes = [
+    {label:'Pass', pct:37.9, color:pass},
+    {label:'Withdrawn', pct:31.2, color:withdrawn},
+    {label:'Fail', pct:21.6, color:fail},
+    {label:'Distinction', pct:9.3, color:distinction},
+  ];
+  const bar = document.getElementById('outcomeBar');
+  const legend = document.getElementById('outcomeLegend');
+  outcomes.forEach(o=>{
+    const seg = document.createElement('div');
+    seg.style.width = o.pct + '%';
+    seg.style.background = o.color;
+    seg.textContent = o.pct + '%';
+    bar.appendChild(seg);
+
+    const item = document.createElement('div');
+    item.className = 'item';
+    item.innerHTML = '<span class="dot" style="background:'+o.color+'"></span>' + o.label;
+    legend.appendChild(item);
+  });
+
+  const gridColor = 'rgba(199,203,191,0.5)';
+  const baseScales = {
+    y:{ grid:{color:gridColor}, ticks:{color:inkSoft} },
+    x:{ grid:{display:false}, ticks:{color:inkSoft} }
+  };
+
+  // ---- Clicks by outcome ----
+  new Chart(document.getElementById('chartClicks'), {
+    type:'bar',
+    data:{ labels:['Withdrawn','Fail','Pass','Distinction'],
+      datasets:[{ data:[314,652,1922,2667], backgroundColor:[withdrawn,fail,pass,distinction], borderRadius:2, maxBarThickness:46 }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:baseScales }
+  });
+
+  // ---- Early engagement timing (grouped) ----
+  new Chart(document.getElementById('chartTiming'), {
+    type:'bar',
+    data:{ labels:['Distinction','Pass','Fail','Withdrawn'],
+      datasets:[
+        {label:'No early engagement', data:[3.6,21.6,24.8,50.0], backgroundColor:'#B9BDAF', borderRadius:2},
+        {label:'Engaged before start', data:[11.4,44.0,20.5,24.2], backgroundColor:pass, borderRadius:2},
+      ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom', labels:{boxWidth:10, padding:14}}}, scales:baseScales }
+  });
+
+  // ---- Completion rate ----
+  new Chart(document.getElementById('chartCompletion'), {
+    type:'bar',
+    data:{ labels:['Withdrawn','Fail','Pass','Distinction'],
+      datasets:[{ data:[29,49,87,88], backgroundColor:[withdrawn,fail,pass,distinction], borderRadius:2, maxBarThickness:46 }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ y:{...baseScales.y, max:100, ticks:{...baseScales.y.ticks, callback:v=>v+'%'}}, x:baseScales.x } }
+  });
+
+  // ---- Pass rate by education ----
+  new Chart(document.getElementById('chartEducation'), {
+    type:'bar',
+    data:{ labels:['No Formal','Lower A-Level','A-Level','HE Qual','Post Grad'],
+      datasets:[{ data:[29.7,38.9,52.0,56.2,65.5], backgroundColor:pass, borderRadius:2, maxBarThickness:40 }]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+      scales:{ y:{...baseScales.y, max:80, ticks:{...baseScales.y.ticks, callback:v=>v+'%'}},
+        x:{ grid:{display:false}, ticks:{color:inkSoft, font:{size:9.5}} } } }
+  });
+})();
+</script>
